@@ -93,7 +93,6 @@ class Widget {
             <h3>Start a search</h3>
             <p>A tool for searching aircraft routes！</p>
         </header>
-        <iframe src="https://staging-app.avitor.ai/me/dashboard" width="600" height="400"></iframe>
     `;
     }
 
