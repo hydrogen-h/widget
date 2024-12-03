@@ -27,6 +27,8 @@ class Widget {
         // iframe.height = '400';
         // document.body.appendChild(iframe);
 
+        console.log("我是script，我成功引入啦！！！！！")
+
 
         /**
          * Create and append a div element to the document body
