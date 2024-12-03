@@ -1,4 +1,4 @@
-import {styles, CLOSE_ICON, MESSAGE_ICON} from "./assets.js";
+import { styles, CLOSE_ICON, MESSAGE_ICON } from "./assets.js";
 
 class Widget {
     constructor(position = "bottom-right") {
@@ -91,7 +91,7 @@ class Widget {
             <h3>Start a search</h3>
             <p>A tool for searching aircraft routes！</p>
         </header>
-        <iframe src="http://localhost:8081/me/request-quote" width="600" height="400"></iframe>
+        <iframe src="https://staging-app.avitor.ai/me/dashboard" width="600" height="400"></iframe>
     `;
     }
 
