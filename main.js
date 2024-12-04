@@ -119,6 +119,7 @@ class Widget {
 }
 
 function initializeWidget() {
+    console.log("initializeWidget");
     return new Widget();
 }
 
