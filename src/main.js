@@ -130,11 +130,11 @@ class Widget {
     }
 
     async initialize() {
-        // const iframe = document.createElement('iframe');
-        // iframe.src = 'http://localhost:8081/me/request-quote'
-        // iframe.width = '600';
-        // iframe.height = '400';
-        // document.body.appendChild(iframe);
+        const iframe = document.createElement('iframe');
+        iframe.src = 'http://localhost:8081/me/request-quote'
+        iframe.width = '600';
+        iframe.height = '400';
+        document.body.appendChild(iframe);
 
         console.log("我是script，我成功引入啦！！！！！")
 
