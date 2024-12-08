@@ -113,7 +113,7 @@ class Widget {
     constructor(position = "bottom-right") {
         this.position = this.getPosition(position);
         this.open = false;
-        this.initialize();
+        // this.initialize();
         this.injectStyles();
     }
 
@@ -131,9 +131,8 @@ class Widget {
 
     async initialize() {
         const iframe = document.createElement('iframe');
-        iframe.src = 'http://localhost:8081/me/request-quote'
-        iframe.width = '600';
-        iframe.height = '400';
+        iframe.src = 'http://localhost:8081/me/request-quote-widget'
+
         document.body.appendChild(iframe);
 
         console.log("我是script，我成功引入啦！！！！！")
@@ -227,9 +226,5 @@ class Widget {
     }
 }
 
-function initializeWidget() {
-    console.log("initializeWidget");
-    return new Widget();
-}
 
-initializeWidget();
+export default new Widget();
