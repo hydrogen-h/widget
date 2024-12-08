@@ -6,7 +6,12 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Avitor Widget</title>
-
+    <style>
+        #app {
+            width: 560px;
+            height: 400px;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,7 +22,10 @@
     <script type="module">
         import Widget from './src/main.js'
 
-        Widget
+        console.log("Widget", Widget)
+        Widget.initialize({
+            targetId: 'app'
+        })
 
     </script>
 </body>
