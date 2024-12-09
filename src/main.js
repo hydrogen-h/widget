@@ -5,7 +5,7 @@ class Widget {
     async initialize({ targetId }) {
         const t = document.getElementById(targetId)
         const iframe = document.createElement('iframe');
-        iframe.src = 'http://localhost:8081/me/request-quote-widget'
+        iframe.src = 'https://staging-app.avitor.ai/me/request-quote-widget'
         iframe.width = '100%';
         iframe.height = '100%';
         iframe.style.border = 'none'
