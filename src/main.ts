@@ -22,11 +22,13 @@ class Widget {
   private instances: Map<string, WidgetInstance>;
   private readonly DEFAULT_TIMEOUT: number;
   private readonly ALLOWED_ORIGINS: string[];
+  private readonly WIDGET_URL: string;
 
   constructor() {
     this.instances = new Map();
     this.DEFAULT_TIMEOUT = 10000;
     this.ALLOWED_ORIGINS = ["https://staging-app.avitor.ai"];
+    this.WIDGET_URL = "https://staging-app.avitor.ai/request-quote-widget";
   }
 
   /**
@@ -57,27 +59,27 @@ class Widget {
         transition: opacity 0.3s ease;
       `;
 
-      // 添加加载指示器
-      // const loader = this._createLoader();
-      // container.appendChild(loader);
+      // 健全功能：添加加载指示器
+      const loader = this._createLoader();
+      container.appendChild(loader);
 
       // 第四步：创建和设置 iframe
       const iframe = this._createIframe({ widgetId, salt });
 
-      // 设置消息处理
+      // 健全功能：设置postMessage消息处理
       this._setupMessageHandling(iframe, targetId);
 
-      // 处理 iframe 加载
+      // 健全功能：处理 iframe 加载，返回iframe加载完成后的promise
       const loadPromise = this._handleIframeLoad(iframe, container, loader);
 
-      // 添加超时
+      // 健全功能：添加超时promise, 返回超时后的promise
       const timeoutPromise = this._createTimeout();
 
-      // 添加元素到 DOM
+      // 第五步：添加元素到 DOM
       container.appendChild(iframe);
       targetElement.appendChild(container);
 
-      // 等待加载或超时
+      // 健全功能：比较加载和超时快慢
       await Promise.race([loadPromise, timeoutPromise]);
 
       // 存储实例以便清理
@@ -93,7 +95,7 @@ class Widget {
   }: Omit<WidgetConfig, "targetId">): HTMLIFrameElement {
     const iframe = document.createElement("iframe");
     // 使用new URL()创建url更加安全规范
-    const url = new URL("http://localhost:8081/request-quote-widget");
+    const url = new URL(this.WIDGET_URL);
     // 使用encodeURIComponent()对参数进行编码，确保了参数值能够正确且安全地传递
     url.searchParams.set("widgetId", encodeURIComponent(widgetId));
     url.searchParams.set("salt", encodeURIComponent(salt));
@@ -120,28 +122,48 @@ class Widget {
     return iframe;
   }
 
-  // private _createLoader(): HTMLDivElement {
-  //   const loader = document.createElement("div");
-  //   loader.style.cssText = `
-  //     position: absolute;
-  //     top: 50%;
-  //     left: 50%;
-  //     transform: translate(-50%, -50%);
-  //     width: 40px;
-  //     height: 40px;
-  //     border: 4px solid #f3f3f3;
-  //     border-top: 4px solid #3498db;
-  //     border-radius: 50%;
-  //     animation: spin 1s linear infinite;
-  //   `;
+  private _createLoader(): HTMLDivElement {
+    const loader = document.createElement("div");
+    loader.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    `;
 
-  //   const style = document.createElement("style");
-  //   style.textContent =
-  //     "@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }";
-  //   document.head.appendChild(style);
+    const style = document.createElement("style");
+    style.textContent =
+      "@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }";
+    document.head.appendChild(style);
 
-  //   return loader;
-  // }
+    return loader;
+  }
+
+  private _setupMessageHandling(
+    frame: HTMLIFrameElement,
+    containerId: string
+  ): void {
+    window.addEventListener("message", (event: MessageEvent) => {
+      // 验证消息来源
+      if (!this.ALLOWED_ORIGINS.includes(event.origin)) {
+        console.warn("Received message from untrusted domain:", event.origin);
+        return;
+      }
+
+      if (event.data.type === 'resize') {
+        const instance = this.instances.get(containerId);
+        if (instance?.container) {
+          instance.container.style.height = `${event.data.height}rem`;
+        }
+      }
+    });
+  }
 
   private _handleIframeLoad(
     iframe: HTMLIFrameElement,
@@ -194,81 +216,7 @@ class Widget {
     }
   }
 
-  private _setupMessageHandling(
-    frame: HTMLIFrameElement,
-    containerId: string
-  ): void {
-    window.addEventListener("message", (event: MessageEvent) => {
-      // 验证消息来源
-      if (!this.ALLOWED_ORIGINS.includes(event.origin)) {
-        console.warn("Received message from untrusted domain:", event.origin);
-        return;
-      }
-
-      try {
-        const message = event.data as WidgetMessage;
-
-        switch (message.type) {
-          case "widget:ready":
-            this._handleWidgetReady(containerId);
-            break;
-
-          case "widget:resize":
-            this._handleWidgetResize(
-              containerId,
-              message.payload as ResizePayload
-            );
-            break;
-
-          case "widget:error":
-            this._handleWidgetError(containerId, message.payload as Error);
-            break;
-
-          case "widget:action":
-            this._handleWidgetAction(containerId, message.payload);
-            break;
-
-          default:
-            console.debug("Unhandled widget message type:", message.type);
-        }
-      } catch (error) {
-        console.error("Error handling widget message:", error);
-      }
-    });
-  }
-
-  private _handleWidgetReady(containerId: string): void {
-    const container = document.getElementById(containerId);
-    if (container) {
-      container.dispatchEvent(new CustomEvent("widget:ready"));
-    }
-  }
-
-  private _handleWidgetResize(
-    containerId: string,
-    { height }: ResizePayload
-  ): void {
-    const container = document.getElementById(containerId);
-    if (container && height) {
-      container.style.height = `${height}px`;
-    }
-  }
-
-  private _handleWidgetError(containerId: string, error: Error): void {
-    console.error("Widget reported error:", error);
-    this._handleError(error, containerId);
-  }
-
-  private _handleWidgetAction(containerId: string, action: any): void {
-    const container = document.getElementById(containerId);
-    if (container) {
-      container.dispatchEvent(
-        new CustomEvent("widget:action", {
-          detail: action,
-        })
-      );
-    }
-  }
+  
 }
 
 export default new Widget();
